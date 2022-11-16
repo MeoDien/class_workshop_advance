@@ -21,119 +21,128 @@ for (var i = 0; i < response.length; i++) {
       response[i].answers[answer].answer;
   });
 
-    // convert location coordinates string to float array
-    submissionProps["Location Coordinates"] = submissionProps[
-        "Location Coordinates"
-      ]
-        .split(/\r?\n/)
-        .map((x) => parseFloat(x.replace(/[^\d.-]/g, "")))
-  
-      console.log(submissionProps);
-  
-      // add submission to submissions array
-      submissions.push(submissionProps);
-    }  
+ // convert location coordinates string to float array
+ submissionProps["Location Coordinates"] = submissionProps[
+  "Location Coordinates"
+]
+  .split(/\r?\n/)
+  .map((X) => parseFloat(X.replace(/[^\d.-]/g, "")));
+
+  console.log(submissionProps);
+
+// add submission to submissions array
+submissions.push(submissionProps);
+}
 // Import Layers from DeckGL
 const { MapboxLayer, ScatterplotLayer } = deck;
 
 // YOUR MAPBOX TOKEN HERE
-  mapboxgl.accessToken = "pk.eyJ1IjoibGluaC10cmluaCIsImEiOiJjbDl3dThkYWswNDNiM25wajhrZXlneTE1In0.9GCUDxTX5FwtVbHDtXz5ew";
+mapboxgl.accessToken = "pk.eyJ1IjoibGluaC10cmluaCIsImEiOiJjbDl3dThkYWswNDNiM25wajhrZXlneTE1In0.9GCUDxTX5FwtVbHDtXz5ew";
 
-  const map = new mapboxgl.Map({
-    container: document.body,
-    style: "mapbox://styles/linh-trinh/claezvfzb007814q922y5hib1", // Your style URL
-    center: [-71.10326, 42.36476], // starting position [lng, lat]
-    zoom: 12, // starting zoom
-    projection: "globe", // display the map as a 3D globe
-  });
+const map = new mapboxgl.Map({
+container: document.body,
+style: "mapbox://styles/linh-trinh/claezvfzb007814q922y5hib1", // Your style URL
+center: [-71.10326, 42.36476], // starting position [lng, lat]
+zoom: 12, // starting zoom
+projection: "globe", // display the map as a 3D globe
+});
 
-  style URL
-  center: [-71.10326, 42.36476], // starting position [lng, lat]
-  zoom: 12, // starting zoom
-  projection: "globe", // display the map as a 3D globe
+map.on("load", () => {
+const firstLabelLayerId = map
+  .getStyle()
+  .layers.find((layer) => layer.type === "symbol").id;
 
-  map.on("load", () => {
-    const firstLabelLayerId = map
-      .getStyle()
-      .layers.find((layer) => layer.type === "symbol").id;
+map.addLayer(
+  new MapboxLayer({
+    id: "deckgl-circle",
+    type: ScatterplotLayer,
+    data: submissions,
+    getPosition: (d) => {
+      return d["Location Coordinates"];
+    },
+    // Styles
+    radiusUnits: "pixels",
+    getRadius: 10,
+    opacity: 0.7,
+    stroked: false,
+    filled: true,
+    radiusScale: 3,
+    getFillColor: [255, 0, 0],
+    pickable: true,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 255],
+    parameters: {
+      depthTest: false,
+    },
+    onClick: (info) => {
+      getImageGallery(
+        info.object.fileUpload, infor.object.describeWhat);
+      flyToClick(info.object["Location Coordinates"]);
+    },
+  }),
+  firstLabelLayerId
+);
+function getImageGallery(images, text) {
+  const imageGallery = document.createElement("div");
+  imageGallery.id = "image-gallery";
 
-    map.addLayer(
-      new MapboxLayer({
-        id: "deckgl-circle",
-        type: ScatterplotLayer,
-        data: submissions,
-        getPosition: (d) => {
-          return d["Location Coordinates"];
-        },
-        // Styles
-        radiusUnits: "pixels",
-        getRadius: 10,
-        opacity: 0.7,
-        stroked: false,
-        filled: true,
-        radiusScale: 3,
-        getFillColor: [255, 0, 0],
-        pickable: true,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 255],
-        parameters: {
-          depthTest: false,
-        },
-        onClick: (info) => {
-          getImageGallery(
-            info.object.fileUpload,
-          );
-          flyToClick(info.object["Location Coordinates"]);
-        },
-      }),
-      firstLabelLayerId
-    );
+  for (var i = 0; i < images.length; i++) {
+    const image = document.createElement("img");
+    image.src = images[i];
 
-    function getImageGallery(images, text) {
-      const imageGallery = document.createElement("div");
-      imageGallery.id = "image-gallery";
+    imageGallery.appendChild(image);
+  }
+//   add exit button to image gallery
+const exitButton = document.createElement("button");
+exitButton.id = "exit-button";
+exitButton.innerHTML = "X";
+exitButton.addEventListener("click", () => {
+  document.getElementById("image-gallery").remove();
+});
+//   stylize the exit button to look good: this can also be a css class
+exitButton.style.position = "fixed";
+exitButton.style.top = "0";
+exitButton.style.right = "0";
+exitButton.style.borderRadius = "0";
+exitButton.style.padding = "1rem";
+exitButton.style.fontSize = "2rem";
+exitButton.style.fontWeight = "bold";
+exitButton.style.backgroundColor = "white";
+exitButton.style.border = "none";
+exitButton.style.cursor = "pointer";
+exitButton.style.zIndex = "1";
 
-      for (var i = 0; i < images.length; i++) {
-        const image = document.createElement("img");
-        image.src = images[i];
 
-        imageGallery.appendChild(image);
-      }
+imageGallery.appendChild(exitButton);
 
-      //   add exit button to image gallery
-      const exitButton = document.createElement("button");
-      exitButton.id = "exit-button";
-      exitButton.innerHTML = "X";
-      exitButton.addEventListener("click", () => {
-        document.getElementById("image-gallery").remove();
+ // add text to image gallery
+  const textDiv = document.createElement("div");
+  textDiv.id = "image-gallery-text";
+  textDiv.innerHTML = text;
+
+ // add fixed styling if in modal view
+  textDiv.style.position = "fixed";
+  textDiv.style.top = "0";
+  textDiv.style.left = "0";
+  textDiv.style.right = "0";
+  textDiv.style.borderRadius = "0";
+  textDiv.style.padding = "2rem";
+  textDiv.style.fontSize = "2rem";
+  
+  imageGallery.appendChild(textDiv);
+  
+  // append the image gallery to the body
+  document.body.appendChild(imageGallery);
+  }
+
+function flyToClick(coords) {
+map.flyTo({
+  center: [coords[0], coords[1]],
+  zoom: 17,
+  essential: true, // this animation is considered essential with respect to prefers-reduced-motion
       });
-
-      //   stylize the exit button to look good: this can also be a css class
-      exitButton.style.position = "fixed";
-      exitButton.style.top = "0";
-      exitButton.style.right = "0";
-      exitButton.style.borderRadius = "0";
-      exitButton.style.padding = "1rem";
-      exitButton.style.fontSize = "2rem";
-      exitButton.style.fontWeight = "bold";
-      exitButton.style.backgroundColor = "white";
-      exitButton.style.border = "none";
-      exitButton.style.cursor = "pointer";
-    	exitButton.style.zIndex = "1";
-
-
-      imageGallery.appendChild(exitButton);
-
-      // append the image gallery to the body
-      document.body.appendChild(imageGallery);
-    }
-
-
-    function flyToClick(coords) {
-      map.flyTo({
-        center: [coords[0], coords[1]],
-        zoom: 17,
-        essential: true, // this animation is considered essential with respect to prefers-reduced-motion
-      });
     }
   });
+});
+
+
