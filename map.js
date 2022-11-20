@@ -75,6 +75,7 @@ map.addLayer(
       depthTest: false,
     },
     onClick: (info) => {
+      //ADD NEW INPUT TO GETIMAGE GALLERY:
       getImageGallery(
         info.object.fileUpload, infor.object.describeWhat);
       flyToClick(info.object["Location Coordinates"]);
@@ -82,6 +83,7 @@ map.addLayer(
   }),
   firstLabelLayerId
 );
+
 function getImageGallery(images, text) {
   const imageGallery = document.createElement("div");
   imageGallery.id = "image-gallery";
@@ -92,6 +94,7 @@ function getImageGallery(images, text) {
 
     imageGallery.appendChild(image);
   }
+
 //   add exit button to image gallery
 const exitButton = document.createElement("button");
 exitButton.id = "exit-button";
@@ -99,6 +102,7 @@ exitButton.innerHTML = "X";
 exitButton.addEventListener("click", () => {
   document.getElementById("image-gallery").remove();
 });
+
 //   stylize the exit button to look good: this can also be a css class
 exitButton.style.position = "fixed";
 exitButton.style.top = "0";
@@ -142,6 +146,7 @@ map.flyTo({
   essential: true, // this animation is considered essential with respect to prefers-reduced-motion
       });
     }
+    
     // create “current location” function, which doesn’t trigger until called upon.
     function addUserLocation(latitude, longitude) {
       return map.addLayer(
@@ -190,10 +195,12 @@ map.flyTo({
       getCurrentLocation();
     }
     const locationButton = document.createElement("div");
+
     // create a button that will request the users location
     locationButton.textContent = "Where am I?";
     locationButton.id = "location-button";
     locationButton.addEventListener("click", () => {
+
       // when clicked, get the users location
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
